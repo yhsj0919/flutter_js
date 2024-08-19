@@ -154,6 +154,7 @@ XMLHttpRequest.prototype._send_native_callback = function(responseInfo, response
             this.response = JSON.parse(responseText);
         }
         catch (e) {
+            console.log(e);
             error = "Could not parse JSON response: " + responseText;
         }
         break;
@@ -323,10 +324,16 @@ extension JavascriptRuntimeXhrExtension on JavascriptRuntime {
             break;
         }
         // assuming request was successfully executed
-        String responseText = utf8.decode(response.bodyBytes);
-        try {
-          responseText = jsonEncode(json.decode(responseText));
-        } on Exception {}
+        String responseText = utf8
+            .decode(response.bodyBytes)
+            .replaceAll("\\", "\\\\")
+            .replaceAll("`", "\\`");
+        // print('原始字符串：$responseText');
+        // try {
+        //   responseText = jsonEncode(json.decode(responseText));
+        // } on Exception {}
+
+        // print('处理后的符串：$responseText');
         final xhrResult = XmlHttpRequestResponse(
           responseText: responseText,
           responseInfo:
