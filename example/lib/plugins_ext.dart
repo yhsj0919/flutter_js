@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -51,21 +52,15 @@ extension JavascriptRuntimeFetchExtension on JavascriptRuntime {
     return this;
   }
 
-  Future<JavascriptRuntime> enableAlert({required AlertBuilder build}) async {
+  ///注入方法
+  dynamic injectMethod(String methodName, dynamic Function(dynamic args) fn) {
     evaluate("""
-    var window = {
-      alert: function() {
-        sendMessage('NativeAlert', JSON.stringify([...arguments]));
-      },
-    }
-    
-    function alert(channelName, message) {
-          sendMessage('NativeAlert', JSON.stringify([...arguments]));
-        }
-        alert
+      async function $methodName() {
+         return await sendMessage('$methodName', JSON.stringify([...arguments]));
+      }
     """);
-    onMessage('NativeAlert', (dynamic args) {
-      build.call(args);
+    onMessage('$methodName', (dynamic args) {
+      return fn.call(args);
     });
     return this;
   }
@@ -87,6 +82,7 @@ extension JavascriptRuntimeFetchExtension on JavascriptRuntime {
       executePendingJob();
       return handlePromise(asyncResult).then((value) {
         if (value.isError) {
+          print("出现异常2");
           return Future.error(value.rawResult);
         } else {
           return Future.value(value.stringResult);
@@ -106,13 +102,23 @@ extension JavascriptRuntimeFetchExtension on JavascriptRuntime {
     if (result.rawResult == false) {
       return Future.error("尚未实现此方法");
     }
-    var params = "$method(${args.map((e) => "'$e'").join(",")})";
-    print("当前请求:$params");
-    return _invokeMethod(params);
-  }
 
-  ///注册方法
-  dynamic registerMethod(String methodName, dynamic Function(dynamic args) fn) {
-    return onMessage(methodName, fn);
+    var params = "${args.map((e) {
+      if (e is String) {
+        return "'$e'";
+      } else if (e is num) {
+        return "$e";
+      } else if (e is Map) {
+        return "JSON.parse('${json.encode(e)}')";
+      } else if (e is Iterable) {
+        return "JSON.parse('${json.encode(e)}')";
+      } else {
+        return "'$e'";
+      }
+    }).join(",")}";
+
+    var request = "$method($params)";
+    print("当前请求:$request");
+    return _invokeMethod(request);
   }
 }

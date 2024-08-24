@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_js/flutter_js.dart';
 import 'plugins_ext.dart';
@@ -37,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     flutterJs = getJavascriptRuntime();
-    flutterJs?.enableAlert(build: (args) {
+    flutterJs?.injectMethod("alert", (args) {
       String output = args.join(' ');
       return showDialog<void>(
         context: context,
@@ -63,11 +61,15 @@ class _HomePageState extends State<HomePage> {
 
     flutterJs?.enableAssetsPlugin(path: "assets/test.js");
 
-    flutterJs?.registerMethod('getDataAsync', (dynamic args) {
+    flutterJs?.injectMethod('getDataAsync', (dynamic args) {
       return "来自Dart的消息";
     });
 
-    flutterJs?.registerMethod('asyncWithError', (_) async {
+    flutterJs?.injectMethod('dartMethod', (dynamic args) {
+      return "这是静态消息";
+    });
+
+    flutterJs?.injectMethod('asyncWithError', (_) async {
       await Future.delayed(const Duration(milliseconds: 100));
       return Future.error('Some error');
     });
@@ -89,7 +91,19 @@ class _HomePageState extends State<HomePage> {
           setState(() {
             _jsResult = "";
           });
-          flutterJs?.invokeMethod(method: 'test2').then((v) {
+          // flutterJs?.evaluate('''
+          //
+          // var sss=JSON.parse('{"aa":"bb"}')
+          //
+          // test2('a',2)
+          //
+          // ''');
+
+          flutterJs?.invokeMethod(method: 'test2', args: [
+            "sss",
+            {"aa": "vvv"},
+            ["sss","dddd"]
+          ]).then((v) {
             setState(() {
               _jsResult = v;
             });
