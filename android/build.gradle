@@ -1,8 +1,8 @@
-group 'io.abner.flutter_js'
-version '1.0-SNAPSHOT'
+group = "io.abner.flutter_js"
+version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.kotlin_version = '1.7.20'
+    ext.kotlin_version = '1.8.22'
     repositories {
         google()
         mavenCentral()
@@ -26,11 +26,12 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 29
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    if (project.android.hasProperty("namespace")) {
+        namespace = "io.abner.flutter_js"
     }
+
+    compileSdkVersion 34
 
     // //quickjs C build disabled for now - crashing with SEGV_MAPERR on ARM based devices
     // externalNativeBuild {
@@ -56,6 +57,15 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
 }
 
 dependencies {

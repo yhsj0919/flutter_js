@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_js/flutter_js.dart';
-import 'plugins_ext.dart';
 
 void main() {
   runApp(MyApp());
@@ -35,7 +34,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     flutterJs = getJavascriptRuntime();
+
     flutterJs?.injectMethod("alert", (args) {
+      print(args);
       String output = args.join(' ');
       return showDialog<void>(
         context: context,
@@ -62,6 +63,7 @@ class _HomePageState extends State<HomePage> {
     flutterJs?.enableAssetsPlugin(path: "assets/test.js");
 
     flutterJs?.injectMethod('getDataAsync', (dynamic args) {
+      print("js过来的=>$args");
       return "来自Dart的消息";
     });
 
@@ -98,12 +100,10 @@ class _HomePageState extends State<HomePage> {
           // test2('a',2)
           //
           // ''');
-
-          flutterJs?.invokeMethod(method: 'test2', args: [
-            "sss",
-            {"aa": "vvv"},
-            ["sss","dddd"]
-          ]).then((v) {
+          flutterJs?.invokeMethod(
+            method: 'test2',
+            args: ["sss", 99, {"aa": "vvv"}, ["sss", "dddd"],],
+          ).then((v) {
             setState(() {
               _jsResult = v;
             });

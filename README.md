@@ -179,6 +179,92 @@ Now, if your javascript code calls `sendMessage('someChannelName', JSON.stringif
 with a List containing 1, 2, 3 as it elements.
 
 
+**增加部分扩展**
+
+本质都是调用了evaluate，只是让代码看起来符合直觉
+
+启用插件
+```dart
+//启用文件插件
+javascriptRuntime.enableFilePlugin({required String? path})
+//启用Assets插件
+javascriptRuntime.enableAssetsPlugin({required String? path})
+//传入字符串
+javascriptRuntime.enableStringPlugin({required String code})
+
+
+```
+
+注入方法
+
+重新封装了一下onMessage
+
+dart
+```dart
+javascriptRuntime?.injectMethod('getDataAsync', (dynamic args) {
+print("js过来的=>$args");//js过来的=>[{count: 5}, 来自js, [aa, bb]]
+return "来自Dart的消息";
+});
+```
+
+js
+
+```js
+
+var asyncResult = await getDataAsync({"count": 5}, "来自js", ["aa", "bb"]);
+
+console.log(asyncResult)//来自Dart的消息
+
+```
+
+执行方法
+
+dart
+```dart
+//异步请求，返回请求结果，参数自动转为对应的对象
+//test2('sss',99,JSON.parse('{"aa":"vvv"}'),JSON.parse('["sss","dddd"]'))
+javascriptRuntime?.invokeMethod(
+    method: 'test2',
+    args: ["sss", 99, {"aa": "vvv"}, ["sss", "dddd"],],
+).then((v) {
+    //"我是来自js的消息"
+    print(v)
+});
+
+```
+js
+
+```js
+
+async function test2(a, b) {
+    //{0: sss, 1: 99, 2: {aa: vvv}, 3: [sss, dddd]}
+    console.log(arguments)
+    for (let argument of arguments) {
+        // string sss
+        // number 99
+        // object {aa: vvv}
+        // object [sss, dddd]
+        console.log(typeof argument, argument)
+    }
+    
+    // 也可以直接使用a,b,这里为前两个参数
+    
+    return "我是来自js的消息"
+}
+
+```
+dart
+
+```dart
+//通过字符串请求，返回请求结果
+//如获取匿名对象的key，这里参数不带引号，上面方法可能不太适合
+javascriptRuntime?.invokeCode(code: "Object.keys(flutterJs)").then((v) {
+    print(v)
+});
+
+```
+
+
 ## Alternatives (and also why we think our library is better)
 
 There were another packages which provides alternatives to evaluate javascript in flutter projects:
