@@ -8,10 +8,10 @@ import 'package:flutter_js/flutter_js.dart';
 ///js扩展
 extension JavascriptRuntimeExtension on JavascriptRuntime {
   ///启用文件插件
-  Future<JavascriptRuntime> enableFilePlugin({required String? path}) async {
+  JavascriptRuntime enableFilePlugin({required String? path}) {
     if (path != null) {
       var file = File(path);
-      final plugin = await file.readAsString();
+      final plugin = file.readAsStringSync();
       final evalResult = evaluate(plugin);
       if (kDebugMode) {
         print('插件结果: $path : $evalResult');
@@ -31,7 +31,7 @@ extension JavascriptRuntimeExtension on JavascriptRuntime {
   }
 
   ///启用字符串插件
-  Future<JavascriptRuntime> enableStringPlugin({required String code}) async {
+  JavascriptRuntime enableStringPlugin({required String code}) {
     final evalResult = evaluate(code);
     if (kDebugMode) {
       print('插件结果: code : $evalResult');
@@ -63,7 +63,6 @@ extension JavascriptRuntimeExtension on JavascriptRuntime {
       executePendingJob();
       return handlePromise(asyncResult).then((value) {
         if (value.isError) {
-          print("出现异常2");
           return Future.error(value.rawResult);
         } else {
           return Future.value(value.rawResult);
@@ -71,7 +70,7 @@ extension JavascriptRuntimeExtension on JavascriptRuntime {
       });
     } catch (e) {
       if (kDebugMode) {
-        print("出现异常2");
+        print(e);
       }
       return Future.error(e);
     }
