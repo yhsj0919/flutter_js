@@ -88,22 +88,35 @@ extension JavascriptRuntimeExtension on JavascriptRuntime {
 
     var params = args.map((e) {
       if (e is String) {
-        return "'$e'";
+        return "'${_escape(e)}'";
       } else if (e is num) {
         return "$e";
       } else if (e is Map) {
-        return "JSON.parse('${json.encode(e)}')";
+        return "JSON.parse('${_escape(json.encode(e))}')";
       } else if (e is Iterable) {
-        return "JSON.parse('${json.encode(e)}')";
+        return "JSON.parse('${_escape(json.encode(e))}')";
       } else {
         return "'$e'";
       }
     }).join(",");
 
-    var request = "$method($params)";
+    var request = "$method(${params})";
     if (kDebugMode) {
       print("当前请求:$request");
     }
     return invokeCode(request);
+  }
+
+  String _escape(String str) {
+    return str
+        .replaceAll("\\", '\\\\')
+        .replaceAll("\'", "\\'")
+        .replaceAll("\`", "\\`")
+        .replaceAll("\/", '\\/')
+        .replaceAll("\b", '\\b')
+        .replaceAll("\f", '\\f')
+        .replaceAll("\n", '\\n')
+        .replaceAll("\r", '\\r')
+        .replaceAll("\t", '\\t');
   }
 }

@@ -32,7 +32,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
     flutterJs = getJavascriptRuntime();
 
     flutterJs?.injectMethod("alert", (args) {
@@ -87,29 +86,43 @@ class _HomePageState extends State<HomePage> {
         child: Text("${_jsResult}"),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        icon: Icon(Icons.javascript_outlined),
-        label: Text("互相调用"),
-        onPressed: () {
-          setState(() {
-            _jsResult = "";
-          });
-          // flutterJs?.evaluate('''
-          //
-          // var sss=JSON.parse('{"aa":"bb"}')
-          //
-          // test2('a',2)
-          //
-          // ''');
-          flutterJs?.invokeMethod(
-            method: 'test2',
-            args: ["sss", 99, {"aa": "vvv"}, ["sss", "dddd"],],
-          ).then((v) {
-            setState(() {
-              _jsResult = v;
-            });
-          });
-        },
-      ),
+          label: Row(
+            children: [
+              IconButton(
+                  onPressed: () {
+                    flutterJs = getJavascriptRuntime();
+                  },
+                  icon: Icon(Icons.create)),
+              IconButton(
+                  onPressed: () {
+                    flutterJs?.dispose();
+                    flutterJs = null;
+                  },
+                  icon: Icon(Icons.delete)),
+              IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _jsResult = "";
+                    });
+
+                    flutterJs?.invokeMethod(
+                      method: 'test2',
+                      args: [
+                        "ss'·\$`\"dd\"}{s",
+                        99,
+                        {"aa": "vv\"\"`'v"},
+                        ["sss", "dd]dd"],
+                      ],
+                    ).then((v) {
+                      setState(() {
+                        _jsResult = v;
+                      });
+                    });
+                  },
+                  icon: Icon(Icons.ac_unit)),
+            ],
+          ),
+          onPressed: null),
     );
   }
 }
