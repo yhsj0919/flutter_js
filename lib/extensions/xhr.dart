@@ -198,17 +198,19 @@ XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
   this._requestHeaders.push([header, value]);
 };
 XMLHttpRequest.prototype.getAllResponseHeaders = function() {
+  var headers=JSON.parse(this._responseHeaders)
   var ret = "";
-  for (var i = 0; i < this._responseHeaders.length; i++) {
-    var keyValue = this._responseHeaders[i];
+  for (var i = 0; i < headers.length; i++) {
+    var keyValue = headers[i];
     ret += keyValue[0] + ": " + keyValue[1] + "\\r\\n";
   }
   return ret;
 };
 XMLHttpRequest.prototype.getResponseHeader = function(name) {
+ var headers=JSON.parse(this._responseHeaders)
   var ret = "";
-  for (var i = 0; i < this._responseHeaders.length; i++) {
-    var keyValue = this._responseHeaders[i];
+  for (var i = 0; i < headers.length; i++) {
+    var keyValue = headers[i];
     if (keyValue[0] !== name) continue;
     if (ret === "") ret += ", ";
     ret += keyValue[1];
@@ -340,7 +342,15 @@ extension JavascriptRuntimeXhrExtension on JavascriptRuntime {
               XhtmlHttpResponseInfo(statusCode: 200, statusText: "OK"),
         );
 
-        final responseInfo = jsonEncode(xhrResult.responseInfo);
+        var tempResponseInfo =
+            XhtmlHttpResponseInfo(statusCode: 200, statusText: "OK");
+        response.headers.forEach((key, value) {
+          tempResponseInfo.addResponseHeaders(key, value);
+        });
+
+        final responseInfo = jsonEncode(tempResponseInfo);
+        print(responseInfo);
+
         //final responseText = xhrResult.responseText; //.replaceAll("\\n", "\\\n");
         final error = xhrResult.error;
         // send back to the javascript environment the
