@@ -349,7 +349,7 @@ extension JavascriptRuntimeXhrExtension on JavascriptRuntime {
         });
 
         final responseInfo = jsonEncode(tempResponseInfo);
-        print(responseInfo);
+        // print(responseInfo);
 
         //final responseText = xhrResult.responseText; //.replaceAll("\\n", "\\\n");
         final error = xhrResult.error;
