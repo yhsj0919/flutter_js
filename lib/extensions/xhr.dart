@@ -320,7 +320,6 @@ extension JavascriptRuntimeXhrExtension on JavascriptRuntime {
             break;
         }
         // assuming request was successfully executed
-        print(gbk.decode(response.bodyBytes));
 
         String responseText;
 
